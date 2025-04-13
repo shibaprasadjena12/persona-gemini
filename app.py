@@ -84,3 +84,6 @@ def chat():
 def clear_conversation():
     session.pop("conversation", None)  
     return jsonify({"message": "Conversation cleared."})
+
+if __name__ == "__main__":
+    app.run(host="0.0.0.0", port=80)
