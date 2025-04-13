@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Chat with Your AI Girlfriend</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 0;
+            margin: 0;
+            background-color: #f9f9f9;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+        }
+        h1 {
+            color: #333;
+            text-align: center;
+            margin: 20px 0;
+        }
+        .conversation {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px;
+        }
+        .message {
+            margin-bottom: 10px;
+        }
+        .user {
+            font-weight: bold;
+            color: #1a73e8;
+        }
+        .bot {
+            font-weight: bold;
+            color: #34a853;
+        }
+        .form-container {
+            background: #fff;
+            padding: 20px;
+            border-top: 1px solid #ddd;
+        }
+        textarea, input[type="submit"] {
+            width: 100%;
+            padding: 10px;
+            font-size: 16px;
+            margin-top: 10px;
+        }
+        .clear-btn {
+            background-color: #ff4d4d;
+            color: white;
+            border: none;
+            padding: 10px;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+    </style>
+    <script>
+        async function sendMessage(event) {
+            event.preventDefault();
+            const userInput = document.querySelector("textarea[name='user_input']").value;
+            if (!userInput.trim()) return;
+
+            const conversationDiv = document.querySelector(".conversation");
+            const userMessage = document.createElement("div");
+            userMessage.className = "message user";
+            userMessage.textContent = "You: " + userInput;
+            conversationDiv.appendChild(userMessage);
+
+            const response = await fetch("/chat", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ user_input: userInput })
+            });
+            const data = await response.json();
+
+            const botMessage = document.createElement("div");
+            botMessage.className = "message bot";
+            botMessage.textContent = "Girlfriend AI: " + data.response;
+            conversationDiv.appendChild(botMessage);
+
+            conversationDiv.scrollTop = conversationDiv.scrollHeight; // Scroll to the latest message
+            document.querySelector("textarea[name='user_input']").value = "";
+        }
+
+        async function clearConversation() {
+            const response = await fetch("/clear", { method: "POST" });
+            if (response.ok) {
+                document.querySelector(".conversation").innerHTML = ""; // Clear the conversation on the page
+            }
+        }
+    </script>
+</head>
+<body>
+    <h1>Apka apna romantic AI Girlfriend</h1>
+    <div class="conversation">
+        <!-- Conversation messages will appear here -->
+    </div>
+    <div class="form-container">
+        <form onsubmit="sendMessage(event)">
+            <label for="user_input">Aapka sawaal:</label><br>
+            <textarea name="user_input" rows="4" required></textarea><br>
+            <input type="submit" value="Send">
+        </form>
+        <button class="clear-btn" onclick="clearConversation()">Clear Conversation</button>
+    </div>
+</body>
+</html>
