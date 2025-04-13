@@ -84,6 +84,3 @@ def chat():
 def clear_conversation():
     session.pop("conversation", None)  
     return jsonify({"message": "Conversation cleared."})
-
-if __name__ == "__main__":
-    app.run(debug=True)
