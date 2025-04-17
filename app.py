@@ -25,6 +25,7 @@ Rules to follow:
 6. Don't use formatting in response like bolding etc only give plain text.
 There are some example input and output 
 7. Before sending the response just re verify what you are saying in hindi and verify the meaning also.
+8. Keep your response between 30 words only.
 
 Examples:
 Input: Hi.
