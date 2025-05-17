@@ -50,7 +50,7 @@
         textarea, input[type="submit"] {
             width: 100%;
             padding: 10px;
-            font-size: 14px; /* Adjusted font size */
+            font-size: 16px; /* Set to 16px to prevent mobile auto-zoom */
             margin-top: 10px;
             border: 1px solid #ddd;
             border-radius: 5px;
@@ -90,17 +90,18 @@
                 padding: 15px; /* Reduced padding */
             }
             textarea {
-                font-size: 12px; /* Smaller font size for textarea */
+                font-size: 16px; /* Keep at least 16px to prevent auto-zoom */
             }
             .clear-btn, input[type="submit"] {
-                font-size: 12px; /* Smaller font size for buttons */
+                font-size: 16px; /* Keep at least 16px to prevent auto-zoom */
             }
         }
     </style>
     <script>
         async function sendMessage(event) {
             event.preventDefault();
-            const userInput = document.querySelector("textarea[name='user_input']").value;
+            const textarea = document.querySelector("textarea[name='user_input']");
+            const userInput = textarea.value;
             if (!userInput.trim()) return;
 
             const conversationDiv = document.querySelector(".conversation");
@@ -109,6 +110,14 @@
             userMessage.textContent = "You: " + userInput;
             conversationDiv.appendChild(userMessage);
 
+            // Show loading indicator
+            const loadingMsg = document.createElement("div");
+            loadingMsg.className = "message bot";
+            loadingMsg.textContent = "Girlfriend AI is typing...";
+            conversationDiv.appendChild(loadingMsg);
+
+            conversationDiv.scrollTop = conversationDiv.scrollHeight;
+
             const response = await fetch("/chat", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
@@ -116,13 +125,17 @@
             });
             const data = await response.json();
 
+            // Remove loading indicator
+            conversationDiv.removeChild(loadingMsg);
+
             const botMessage = document.createElement("div");
             botMessage.className = "message bot";
             botMessage.textContent = "Girlfriend AI: " + data.response;
             conversationDiv.appendChild(botMessage);
 
             conversationDiv.scrollTop = conversationDiv.scrollHeight; // Scroll to the latest message
-            document.querySelector("textarea[name='user_input']").value = "";
+            textarea.value = "";
+            document.querySelector('input[type="submit"]').disabled = true;
         }
 
         async function clearConversation() {
@@ -132,11 +145,20 @@
             }
         }
 
-        document.querySelector("textarea[name='user_input']").addEventListener("keydown", function(event) {
-            if (event.key === "Enter" && !event.shiftKey) {
-                event.preventDefault(); // Prevent newline
-                document.querySelector("form").dispatchEvent(new Event("submit")); // Trigger form submission
-            }
+        document.addEventListener("DOMContentLoaded", function() {
+            const textarea = document.querySelector("textarea[name='user_input']");
+            const submitBtn = document.querySelector('input[type="submit"]');
+            textarea.addEventListener("keydown", function(event) {
+                if (event.key === "Enter" && !event.shiftKey) {
+                    event.preventDefault(); // Prevent newline
+                    document.querySelector("form").dispatchEvent(new Event("submit")); // Trigger form submission
+                }
+            });
+            textarea.addEventListener("input", function() {
+                submitBtn.disabled = !textarea.value.trim();
+            });
+            // Enable/disable on load
+            submitBtn.disabled = !textarea.value.trim();
         });
     </script>
 </head>
@@ -148,8 +170,8 @@
     <div class="form-container">
         <form onsubmit="sendMessage(event)">
             <label for="user_input">Your Message:</label><br>
-            <textarea name="user_input" rows="4" required></textarea><br>
-            <input type="submit" value="Send">
+            <textarea name="user_input" rows="4" required aria-label="Type your message here" autofocus></textarea><br>
+            <input type="submit" value="Send" disabled>
         </form>
         <button class="clear-btn" onclick="clearConversation()">Clear Conversation</button>
     </div>
